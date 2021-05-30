@@ -23,9 +23,6 @@ def main(myblob: func.InputStream):
     output_width = 300
     created_md5 = "md5"
 
-    logging.info(f"BaseName: {input_filename}")
-    logging.info(f"Ext: {extension}")
-
     output_blob = scaling_by_width(myblob, output_width, extension)
 
     blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
