@@ -5,6 +5,7 @@ from azure.storage.blob import BlobServiceClient
 import os
 from io import BytesIO
 from PIL import Image
+import hashlib
 
 connection_string = os.getenv("AzureWebJobsStorage")
 
@@ -21,9 +22,9 @@ def main(myblob: func.InputStream):
 
     input_filename, extension = get_filename_and_extension(myblob.name)
     output_width = 300
-    created_md5 = "md5"
-
+    
     output_blob = scaling_by_width(myblob, output_width, extension)
+    created_md5 = hashlib.md5(output_blob).hexdigest()
 
     blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
     blob_client.upload_blob(output_blob, blob_type="BlockBlob")
