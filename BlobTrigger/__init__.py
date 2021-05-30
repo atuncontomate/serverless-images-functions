@@ -19,15 +19,24 @@ def main(myblob: func.InputStream):
     container_name = "samples-workitems"
     container_client = blob_service_client.get_container_client(container_name)
 
+    input_filename, extension = get_filename_and_extension(myblob.name)
     output_width = 300
     created_md5 = "md5"
 
-    output_blob = scaling_by_width(myblob, output_width)
+    logging.info(f"BaseName: {input_filename}")
+    logging.info(f"Ext: {extension}")
 
-    blob_client = container_client.get_blob_client(f"{output_width}/{created_md5}")
+    output_blob = scaling_by_width(myblob, output_width, extension)
+
+    blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
     blob_client.upload_blob(output_blob, blob_type="BlockBlob")
 
-def scaling_by_width(input_blob: func.InputStream, output_width):
+def get_filename_and_extension(filepath):
+
+    basename = os.path.splitext(os.path.basename(filepath))
+    return basename[0], basename[1].lstrip(".")
+
+def scaling_by_width(input_blob: func.InputStream, output_width, extension):
 
     input_stream = BytesIO(input_blob.read())
     input_img = Image.open(input_stream)
@@ -39,6 +48,6 @@ def scaling_by_width(input_blob: func.InputStream, output_width):
     input_stream.close()
 
     output_byte_arr = BytesIO()
-    resized_image.save(output_byte_arr, format='PNG')
+    resized_image.save(output_byte_arr, format=extension)
     
     return output_byte_arr.getvalue()
