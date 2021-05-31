@@ -7,9 +7,11 @@ from PIL import Image
 import hashlib
 
 from repository import tasks_repository
+from utils.task_status_enum import TaskStatus
 
 connection_string = os.getenv("AzureWebJobsStorage")
 output_widths = os.getenv("OutputWidths")
+container_name = os.getenv("ContainerName")
 
 def main(myblob: func.InputStream):
 
@@ -19,11 +21,10 @@ def main(myblob: func.InputStream):
 
     db_connection = tasks_repository.connect_database()
     task_id = tasks_repository.get_task_id_by_filepath(db_connection, myblob.name)
-    tasks_repository.update_task_status(db_connection, 'PROCESSING', task_id)
+    tasks_repository.update_task_status(db_connection, TaskStatus.PROCESSING, task_id)
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    container_name = "samples-workitems"
     container_client = blob_service_client.get_container_client(container_name)
     
     input_filename, extension = get_filename_and_extension(myblob.name)

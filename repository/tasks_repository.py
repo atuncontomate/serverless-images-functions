@@ -1,4 +1,5 @@
 import os
+from utils.task_status_enum import TaskStatus
 import mysql.connector
 
 db_host = os.getenv("DBHost")
@@ -18,7 +19,7 @@ def get_task_id_by_filepath(db_connection, filepath):
     cursor.execute("SELECT id from imagefunctions.tasks WHERE filepath = '%s'" % (filepath))
     return cursor.fetchone()[0]
 
-def update_task_status(db_connection, status, task_id):
+def update_task_status(db_connection, status: TaskStatus, task_id):
     cursor = db_connection.cursor()
-    cursor.execute("UPDATE imagefunctions.tasks SET Status='%s' WHERE Id = '%s'" % (status, task_id))
+    cursor.execute("UPDATE imagefunctions.tasks SET Status='%s' WHERE Id = '%s'" % (status.value, task_id))
     db_connection.commit()
