@@ -6,9 +6,13 @@ import os
 from io import BytesIO
 from PIL import Image
 import hashlib
+import mysql.connector
 
 connection_string = os.getenv("AzureWebJobsStorage")
 output_widths = os.getenv("OutputWidths")
+db_host = os.getenv("DBHost")
+db_username = os.getenv("DBUsername")
+db_password = os.getenv("DBPassword")
 
 def main(myblob: func.InputStream):
 
@@ -33,6 +37,8 @@ def main(myblob: func.InputStream):
         
     input_blob_bytes.close()
 
+    connect_database()  #TODO: This is just a POC.
+
 def get_filename_and_extension(filepath):
 
     basename = os.path.splitext(os.path.basename(filepath))
@@ -51,3 +57,16 @@ def scaling_by_width(input_blob_bytes: BytesIO, output_width: int, extension):
     resized_image.save(output_byte_arr, format=extension)
     
     return output_byte_arr.getvalue()
+
+def connect_database():
+
+    cnx = mysql.connector.connect(
+        user=db_username, 
+        password=db_password, 
+        host=db_host, 
+        port=3306
+    )
+    
+    cursor = cnx.cursor()
+    cursor.execute("""INSERT INTO imagefunctions.tasks(filepath) VALUES ('test')""")
+    cnx.commit()
