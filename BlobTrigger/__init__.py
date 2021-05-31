@@ -37,7 +37,8 @@ def main(myblob: func.InputStream):
         
     input_blob_bytes.close()
 
-    connect_database()  #TODO: This is just a POC.
+    db_connection = connect_database()
+    insert_filepath(db_connection)  #TODO: This is just a POC.
 
 def get_filename_and_extension(filepath):
 
@@ -59,14 +60,14 @@ def scaling_by_width(input_blob_bytes: BytesIO, output_width: int, extension):
     return output_byte_arr.getvalue()
 
 def connect_database():
-
-    cnx = mysql.connector.connect(
+    return mysql.connector.connect(
         user=db_username, 
         password=db_password, 
         host=db_host, 
         port=3306
     )
     
-    cursor = cnx.cursor()
+def insert_filepath(db_connection):
+    cursor = db_connection.cursor()
     cursor.execute("""INSERT INTO imagefunctions.tasks(filepath) VALUES ('test')""")
-    cnx.commit()
+    db_connection.commit()
