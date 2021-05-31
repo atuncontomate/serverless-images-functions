@@ -1,18 +1,15 @@
 import logging
-
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 import os
 from io import BytesIO
 from PIL import Image
 import hashlib
-import mysql.connector
+
+from repository import tasks_repository
 
 connection_string = os.getenv("AzureWebJobsStorage")
 output_widths = os.getenv("OutputWidths")
-db_host = os.getenv("DBHost")
-db_username = os.getenv("DBUsername")
-db_password = os.getenv("DBPassword")
 
 def main(myblob: func.InputStream):
 
@@ -20,9 +17,9 @@ def main(myblob: func.InputStream):
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
 
-    db_connection = connect_database()
-    task_id = get_task_id_by_filepath(db_connection, myblob.name)
-    update_task_status(db_connection, 'PROCESSING', task_id)
+    db_connection = tasks_repository.connect_database()
+    task_id = tasks_repository.get_task_id_by_filepath(db_connection, myblob.name)
+    tasks_repository.update_task_status(db_connection, 'PROCESSING', task_id)
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
@@ -59,21 +56,3 @@ def scaling_by_width(input_blob_bytes: BytesIO, output_width: int, extension):
     resized_image.save(output_byte_arr, format=extension)
     
     return output_byte_arr.getvalue()
-
-def connect_database():
-    return mysql.connector.connect(
-        user=db_username, 
-        password=db_password, 
-        host=db_host, 
-        port=3306
-    )
-
-def get_task_id_by_filepath(db_connection, filepath):
-    cursor = db_connection.cursor()
-    cursor.execute("SELECT id from imagefunctions.tasks WHERE filepath = '%s'" % (filepath))
-    return cursor.fetchone()[0]
-
-def update_task_status(db_connection, status, task_id):
-    cursor = db_connection.cursor()
-    cursor.execute("UPDATE imagefunctions.tasks SET Status='%s' WHERE Id = '%s'" % (status, task_id))
-    db_connection.commit()
