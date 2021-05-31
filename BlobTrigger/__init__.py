@@ -6,7 +6,9 @@ from io import BytesIO
 from PIL import Image
 import hashlib
 
+from repository import connection_utils
 from repository import tasks_repository
+from repository import images_repository
 from utils.task_status_enum import TaskStatus
 
 connection_string = os.getenv("AzureWebJobsStorage")
@@ -19,7 +21,7 @@ def main(myblob: func.InputStream):
                  f"Name: {myblob.name}\n"
                  f"Blob Size: {myblob.length} bytes")
 
-    db_connection = tasks_repository.connect_database()
+    db_connection = connection_utils.connect_database()
     task_id = tasks_repository.get_task_id_by_filepath(db_connection, myblob.name)
     tasks_repository.update_task_status(db_connection, TaskStatus.PROCESSING, task_id)
 
@@ -40,7 +42,7 @@ def main(myblob: func.InputStream):
             blob_client = container_client.get_blob_client(output_filepath)
             blob_client.upload_blob(output_blob, blob_type="BlockBlob")
 
-            tasks_repository.create_image(db_connection, created_md5, output_width, output_filepath)
+            images_repository.create_image(db_connection, created_md5, output_width, output_filepath)
         
         input_blob_bytes.close()
         
