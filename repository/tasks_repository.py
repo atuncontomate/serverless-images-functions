@@ -1,6 +1,7 @@
 import os
 from utils.task_status_enum import TaskStatus
 import mysql.connector
+import datetime
 
 db_host = os.getenv("DBHost")
 db_username = os.getenv("DBUsername")
@@ -21,5 +22,6 @@ def get_task_id_by_filepath(db_connection, filepath):
 
 def update_task_status(db_connection, status: TaskStatus, task_id):
     cursor = db_connection.cursor()
-    cursor.execute("UPDATE imagefunctions.tasks SET Status='%s' WHERE Id = '%s'" % (status.value, task_id))
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute("UPDATE imagefunctions.tasks SET Status='%s', LastModifiedDate='%s' WHERE Id = '%s'" % (status.value, timestamp, task_id))
     db_connection.commit()

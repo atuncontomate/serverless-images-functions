@@ -23,21 +23,28 @@ def main(myblob: func.InputStream):
     task_id = tasks_repository.get_task_id_by_filepath(db_connection, myblob.name)
     tasks_repository.update_task_status(db_connection, TaskStatus.PROCESSING, task_id)
 
-    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
-    container_client = blob_service_client.get_container_client(container_name)
-    
-    input_filename, extension = get_filename_and_extension(myblob.name)
-    input_blob_bytes = BytesIO(myblob.read())
+        container_client = blob_service_client.get_container_client(container_name)
+        
+        input_filename, extension = get_filename_and_extension(myblob.name)
+        input_blob_bytes = BytesIO(myblob.read())
 
-    for output_width in output_widths.split(","):
-        output_blob = scaling_by_width(input_blob_bytes, int(output_width), extension)
-        created_md5 = hashlib.md5(output_blob).hexdigest()
+        for output_width in output_widths.split(","):
+            output_blob = scaling_by_width(input_blob_bytes, int(output_width), extension)
+            created_md5 = hashlib.md5(output_blob).hexdigest()
 
-        blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
-        blob_client.upload_blob(output_blob, blob_type="BlockBlob")
-    
-    input_blob_bytes.close()
+            blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
+            blob_client.upload_blob(output_blob, blob_type="BlockBlob")
+        
+        input_blob_bytes.close()
+        
+    except:
+        tasks_repository.update_task_status(db_connection, TaskStatus.ERROR, task_id)
+    else:
+        tasks_repository.update_task_status(db_connection, TaskStatus.FINISHED, task_id)
+
 
 def get_filename_and_extension(filepath):
 
