@@ -22,7 +22,7 @@ def main(myblob: func.InputStream):
 
     db_connection = connect_database()
     task_id = get_task_id_by_filepath(db_connection, myblob.name)
-    update_task_to_processing(db_connection, 'PROCESSING', task_id)
+    update_task_status(db_connection, 'PROCESSING', task_id)
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
@@ -67,18 +67,13 @@ def connect_database():
         host=db_host, 
         port=3306
     )
-    
-def insert_filepath(db_connection):
-    cursor = db_connection.cursor()
-    cursor.execute("""INSERT INTO imagefunctions.tasks(filepath) VALUES ('test')""")
-    db_connection.commit()
 
 def get_task_id_by_filepath(db_connection, filepath):
     cursor = db_connection.cursor()
     cursor.execute("SELECT id from imagefunctions.tasks WHERE filepath = '%s'" % (filepath))
     return cursor.fetchone()[0]
 
-def update_task_to_processing(db_connection, status, task_id):
+def update_task_status(db_connection, status, task_id):
     cursor = db_connection.cursor()
     cursor.execute("UPDATE imagefunctions.tasks SET Status='%s' WHERE Id = '%s'" % (status, task_id))
     db_connection.commit()
