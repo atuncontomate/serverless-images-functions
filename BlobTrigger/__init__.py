@@ -26,12 +26,9 @@ def main(myblob: func.InputStream):
     tasks_repository.update_task_status(db_connection, TaskStatus.PROCESSING, task_id)
 
     try:
-        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-
-        container_client = blob_service_client.get_container_client(container_name)
-        
-        input_filename, extension = get_filename_and_extension(myblob.name)
         input_blob_bytes = BytesIO(myblob.read())
+        input_filename, extension = get_filename_and_extension(myblob.name)
+        container_client = build_container_client()
 
         for output_width in output_widths.split(","):
 
@@ -51,6 +48,11 @@ def main(myblob: func.InputStream):
     else:
         tasks_repository.update_task_status(db_connection, TaskStatus.FINISHED, task_id)
 
+
+def build_container_client():
+
+    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    return blob_service_client.get_container_client(container_name)
 
 def get_filename_and_extension(filepath):
 
