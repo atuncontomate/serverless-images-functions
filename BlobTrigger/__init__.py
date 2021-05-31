@@ -32,11 +32,15 @@ def main(myblob: func.InputStream):
         input_blob_bytes = BytesIO(myblob.read())
 
         for output_width in output_widths.split(","):
+
             output_blob = scaling_by_width(input_blob_bytes, int(output_width), extension)
             created_md5 = hashlib.md5(output_blob).hexdigest()
+            output_filepath = f"{input_filename}/{output_width}/{created_md5}.{extension}"
 
-            blob_client = container_client.get_blob_client(f"{input_filename}/{output_width}/{created_md5}.{extension}")
+            blob_client = container_client.get_blob_client(output_filepath)
             blob_client.upload_blob(output_blob, blob_type="BlockBlob")
+
+            tasks_repository.create_image(db_connection, created_md5, output_width, output_filepath)
         
         input_blob_bytes.close()
         
