@@ -7,7 +7,7 @@ Su arquitectura consta de los siguientes componentes:
 - **API REST**, desde la cual importar nuevas imágenes y conocer el estado de los procesos.
 - **Función serverless**, encargada de procesar las imágenes de entrada y actualizar los procesos asociados.
 - **Base de datos**, en la que se persiste la información sobre los procesos y las imágenes creadas.
-- **Sistema de almacenamiento**, donde se alojan las imágenes originales y las resultantes.
+- **Sistema de almacenamiento**, donde se alojan las imágenes originales y las resultantes. Será una cuenta de almacenamiento de Azure Blob Storage.
 
 ## API REST
 
@@ -90,3 +90,30 @@ DBHost=<<database host>>
 DBUsername=<<database username>>
 DBPassword=<<database password>>
 ```
+
+## Base de datos
+
+La información de los procesos y las imágenes creadas se persistirá en una base de datos MySQL. Será necesario crear una base de datos MySQL que contenga un esquema llamado `imagefunctions`, en el cual crearemos las siguientes tablas:
+
+```sql
+CREATE TABLE Tasks (
+    Id INT NOT NULL AUTO_INCREMENT,
+    Filepath VARCHAR(255) NOT NULL,
+    Status VARCHAR(20)NOT NULL,
+    CreatedDate TIMESTAMP,
+    LastModifiedDate TIMESTAMP,
+    PRIMARY KEY (Id)
+);
+CREATE TABLE Images (
+    Id INT NOT NULL AUTO_INCREMENT,
+    CreatedDate TIMESTAMP,
+    MD5 VARCHAR(32),
+    Width INT,
+    Filepath VARCHAR(255),
+    PRIMARY KEY (Id)
+);
+```
+
+## Directorio *output*
+
+En este repositorio se encuentra un directorio llamado `/output`. Este directorio contiene algunas de las imágenes que se han generado durante el funcionamiento de la aplicación.
