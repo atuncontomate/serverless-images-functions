@@ -11,7 +11,7 @@ Su arquitectura consta de los siguientes componentes:
 
 ## API REST
 
-Su implementación está basada en **NodeJS**, está protegida mediante **HTTPS**, y se encuentra en el directorio `api-rest` de este repositorio. 
+Su implementación está basada en **NodeJS**, está protegida mediante **HTTPS**, y se encuentra en el directorio `/api-rest` de este repositorio. 
 Contiene dos recursos: un endpoint `POST` para realizar la subida de imágenes, y un endpoint `GET` para recuperar el estado de los procesos de redimensión.
 
 ### Subida de imágenes
@@ -49,3 +49,21 @@ $ curl --location --request GET 'https://localhost:3443/tasks/<id>'
 ```
 
 La respuesta de este endpoint será el estado de la tarea.
+
+### :gear: Cómo iniciar el servidor
+
+Ubicados en el directorio `/api-rest`, instalaremos las dependencias configuradas en el proyecto mediante el comando `npm install`.
+
+Después, le daremos valor a las variables de entorno:
+```
+export ACCOUNT_NAME=<<blob_storage_account_name>>
+export ACCOUNT_KEY=<<blob_storage_account_key>>
+export CONTAINER_NAME=<<blob_storage_container_name>>
+export HOST_NAME=<<database_host_name>>
+export USER_NAME=<<database_user_name>>
+export PASSWORD=<<database_user_password>>
+```
+
+Por último, arrancamos el servidor con el comando `node server.js`.
+
+
