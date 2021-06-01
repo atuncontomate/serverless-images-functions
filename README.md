@@ -66,4 +66,27 @@ export PASSWORD=<<database_user_password>>
 
 Por último, arrancamos el servidor con el comando `node server.js`.
 
+## Función serverless
 
+Ha sido implementada en **Python**, desarrollada para correr en el stack de Azure, y se encuentra en el directorio `/serverless` de este repositorio. La función tiene configurado un disparador que escucha en el directorio `/input` del contenedor que configuremos, y cada vez que recibe un fichero se pone a trabajar.
+
+Las operaciones que realiza son las siguientes:
+
+1. Al recibir una imagen, extrae el path completo de dicha imagen y recupera el proceso correspondiente de base de datos mediante ese path.
+2. Actualiza el proceso al estado `PROCESSING`.
+3. Recupera de las variables de configuración los anchos a los que se tiene que redimensionar la imagen.
+4. Para cada ancho, genera una imagen redimensionada y la almacena en el contenedor del Blob Storage.
+5. Si todo ha ido bien, actualiza el estado del proceso a `FINISHED`. De lo contrario, si se ha producido algún error, actualiza el estado a `ERROR`.
+
+### Configuración necesaria
+
+Para ejecutar en el entorno remoto de Azure esta función, se deben añadir una serie de variables de configuración. Serán las siguientes:
+
+```
+OutputWidths=<<Output width, e.g "800,1024">>
+AzureWebJobsStorage=<<storage connection string>>
+ContainerName=<<container name>>
+DBHost=<<database host>>
+DBUsername=<<database username>>
+DBPassword=<<database password>>
+```
