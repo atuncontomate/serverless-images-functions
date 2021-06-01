@@ -78,6 +78,8 @@ Las operaciones que realiza son las siguientes:
 4. Para cada ancho, genera una imagen redimensionada y la almacena en el contenedor del Blob Storage.
 5. Si todo ha ido bien, actualiza el estado del proceso a `FINISHED`. De lo contrario, si se ha producido algún error, actualiza el estado a `ERROR`.
 
+:warning: La función ha sido probada con los formatos de imagen `.png` y `.jpg`.
+
 ### :gear: Configuración necesaria
 
 Para ejecutar en el entorno remoto de Azure esta función, se deben añadir una serie de variables de configuración. Serán las siguientes:
@@ -113,7 +115,3 @@ CREATE TABLE Images (
     PRIMARY KEY (Id)
 );
 ```
-
-## Directorio *output*
-
-En este repositorio se encuentra un directorio llamado `/output`. Este directorio contiene algunas de las imágenes que se han generado durante el funcionamiento de la aplicación.
